@@ -32,7 +32,7 @@ class ImagePublisher(Node):
         self.bridge = CvBridge()
 
         # Configuración de la cámara
-        self.cap = cv2.VideoCapture(2, cv2.CAP_V4L2)  # Cambia el índice si usas otra cámara
+        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Cambia el índice si usas otra cámara
         if not self.cap.isOpened():
             self.get_logger().error('No se pudo acceder a la cámara')
             exit(1)
