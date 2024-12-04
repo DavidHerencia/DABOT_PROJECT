@@ -1,0 +1,4 @@
+[console_scripts]
+depth_node = depth_estimation.depth_node:main
+image_node = depth_estimation.bot_image:main
+nav_node = depth_estimation.depth_nav:main
