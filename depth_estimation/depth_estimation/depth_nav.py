@@ -27,7 +27,7 @@ class ImageSubscriber(Node):
             self.image_callback,
             qos_profile
         )
-        self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 1)
         self.bridge = CvBridge()
         cv2.namedWindow('Depth Estimation', cv2.WINDOW_NORMAL)
         
@@ -37,6 +37,7 @@ class ImageSubscriber(Node):
         self.min_safe_depth = 1.0
         self.linear_speed = 0.15
         self.angular_speed = 0.5
+        self.similarity_threshold = 0.1  # Umbral para considerar profundidades similares
 
     def image_callback(self, msg):
         try:
@@ -70,15 +71,20 @@ class ImageSubscriber(Node):
             cmd = Twist()
             if avg_depths['center'] > self.min_safe_depth:
                 cmd.linear.x = self.linear_speed
-                if avg_depths['right'] > avg_depths['left']:
-                    cmd.angular.z = -0.1
+                if abs(avg_depths['right'] - avg_depths['left']) < self.similarity_threshold:
+                    cmd.angular.z = 0.0
+                    print("MOVING FORWARD")
+                elif avg_depths['right'] < avg_depths['left']:
+                    cmd.angular.z = -0.25
+                    print("MOVING TO THE RIGHT")
                 else:
-                    cmd.angular.z = 0.1
+                    cmd.angular.z = 0.25
+                    print("MOVING TO THE LEFT")
             else:
                 cmd.linear.x = 0.0
-                if avg_depths['right'] > self.min_safe_depth:
+                if avg_depths['right'] < self.min_safe_depth:
                     cmd.angular.z = -self.angular_speed
-                elif avg_depths['left'] > self.min_safe_depth:
+                elif avg_depths['left'] < self.min_safe_depth:
                     cmd.angular.z = self.angular_speed
                 else:
                     cmd.angular.z = self.angular_speed  # Gira en el lugar si no hay espacio seguro
