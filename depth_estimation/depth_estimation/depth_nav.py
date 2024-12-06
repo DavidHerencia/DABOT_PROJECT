@@ -114,19 +114,19 @@ class ImageSubscriber(Node):
                 # Objeto cercano al frente - reducir velocidad y girar suavemente
                 cmd.linear.x = self.MAX_SPEED * speed_factor * 0.5
                 if min_depths['right'] < min_depths['left']:
-                    cmd.angular.z = -self.angular_speed_obstacle * 0.8
+                    cmd.angular.z = -self.angular_speed_obstacle * 0.30
                     print("TURNING RIGHT SLOWLY - OBJECT AHEAD")
                 else:
-                    cmd.angular.z = self.angular_speed_obstacle * 0.8
+                    cmd.angular.z = self.angular_speed_obstacle * 0.30
                     print("TURNING LEFT SLOWLY - OBJECT AHEAD")
             else:
                 # Camino libre al frente - ajustar dirección basado en obstáculos laterales
                 cmd.linear.x = self.MAX_SPEED * speed_factor
                 if min_depths['right'] > self.SLOW_DISTANCE:
-                    cmd.angular.z = self.angular_speed_obstacle * 0.5
+                    cmd.angular.z = self.angular_speed_obstacle * 0.45
                     print("ADJUSTING LEFT - RIGHT SIDE CLOSE")
                 elif min_depths['left'] > self.SLOW_DISTANCE:
-                    cmd.angular.z = -self.angular_speed_obstacle * 0.5
+                    cmd.angular.z = -self.angular_speed_obstacle * 0.45
                     print("ADJUSTING RIGHT - LEFT SIDE CLOSE")
                 else:
                     cmd.angular.z = 0.0
