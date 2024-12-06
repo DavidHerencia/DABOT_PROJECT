@@ -37,11 +37,11 @@ class ImageSubscriber(Node):
         
         # Parámetros de control actualizados
         self.STOP_DISTANCE = 1.5  # Reducido para no detenerse tan pronto
-        self.SLOW_DISTANCE = 1.25  # Reducido para mejor control
-        self.MAX_SPEED = 0.12   # Aumentado para mayor velocidad forward
+        self.SLOW_DISTANCE = 0.85  # Reducido para mejor control
+        self.MAX_SPEED = 0.18   # Aumentado para mayor velocidad forward
         self.MIN_SPEED = 0.05
         self.angular_speed = 0.5        # Reducido para giros más suaves
-        self.angular_speed_obstacle = 0.6   # Reducido para evitar giros bruscos
+        self.angular_speed_obstacle = 0.5   # Reducido para evitar giros bruscos
         self.similarity_threshold = 1.5  # Reducido para mejor detección de diferencias
 
     # Mejorar el cálculo del speed_factor
@@ -81,11 +81,6 @@ class ImageSubscriber(Node):
             center_region = depth[:, width//3:2*width//3]
             right_region = depth[:, 2*width//3:]
             
-                        # Calcular el valor mínimo (objeto más cercano) en cada región
-            left_region = depth[:, :width//3]
-            center_region = depth[:, width//3:2*width//3]
-            right_region = depth[:, 2*width//3:]
-            
             DEPTH_SCALE = 0.1  # Factor de conversión a metros
 
             min_depths = {
@@ -105,32 +100,33 @@ class ImageSubscriber(Node):
             cmd = Twist()
             
             # Lógica de navegación mejorada
-            if min_depths['center'] > self.STOP_DISTANCE or min_depths['left'] > self.STOP_DISTANCE or min_depths['right'] > self.STOP_DISTANCE:
+            # if min_depths['center'] > self.STOP_DISTANCE or min_depths['left'] > self.STOP_DISTANCE or min_depths['right'] > self.STOP_DISTANCE:
+            if min_depths['center'] > self.STOP_DISTANCE:
                 # Objeto muy cerca al frente - detenerse y girar hacia el lado más libre
                 cmd.linear.x = 0.0
                 if min_depths['right'] < min_depths['left']:
-                    cmd.angular.z = -self.angular_speed_obstacle
+                    cmd.angular.z = -self.angular_speed_obstacle * 0.8
                     print("ROTATING RIGHT - BLOCKED CENTER")
                 else:
-                    cmd.angular.z = self.angular_speed_obstacle
+                    cmd.angular.z = self.angular_speed_obstacle * 0.8
                     print("ROTATING LEFT - BLOCKED CENTER")
             elif min_depths['center'] > self.SLOW_DISTANCE:
                 # Objeto cercano al frente - reducir velocidad y girar suavemente
                 cmd.linear.x = self.MAX_SPEED * speed_factor * 0.5
                 if min_depths['right'] < min_depths['left']:
-                    cmd.angular.z = self.angular_speed_obstacle * 0.5
+                    cmd.angular.z = -self.angular_speed_obstacle * 0.8
                     print("TURNING RIGHT SLOWLY - OBJECT AHEAD")
                 else:
-                    cmd.angular.z = -self.angular_speed_obstacle * 0.5
+                    cmd.angular.z = self.angular_speed_obstacle * 0.8
                     print("TURNING LEFT SLOWLY - OBJECT AHEAD")
             else:
                 # Camino libre al frente - ajustar dirección basado en obstáculos laterales
                 cmd.linear.x = self.MAX_SPEED * speed_factor
                 if min_depths['right'] > self.SLOW_DISTANCE:
-                    cmd.angular.z = self.angular_speed_obstacle * 0.3
+                    cmd.angular.z = self.angular_speed_obstacle * 0.5
                     print("ADJUSTING LEFT - RIGHT SIDE CLOSE")
                 elif min_depths['left'] > self.SLOW_DISTANCE:
-                    cmd.angular.z = -self.angular_speed_obstacle * 0.3
+                    cmd.angular.z = -self.angular_speed_obstacle * 0.5
                     print("ADJUSTING RIGHT - LEFT SIDE CLOSE")
                 else:
                     cmd.angular.z = 0.0
