@@ -27,7 +27,7 @@ class BotImage(Node):
             Twist,
             'cmd_vel',
             self.cmd_vel_callback,
-            10
+            qos_profile
         )
 
         self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
@@ -38,10 +38,10 @@ class BotImage(Node):
             self.get_logger().error('No se pudo acceder a la cámara')
             exit(1)
 
-        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'JPEG'))
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        self.cap.set(cv2.CAP_PROP_FPS, 60)
+        self.cap.set(cv2.CAP_PROP_FPS, 30)
 
         self.timer = self.create_timer(0.1, self.timer_callback)
 
@@ -74,7 +74,7 @@ class BotImage(Node):
     def __del__(self):
         self.cap.release()
 
-def main(args=None):
+def main(args=None):    
     rclpy.init(args=args)
     node = BotImage()
     try:
