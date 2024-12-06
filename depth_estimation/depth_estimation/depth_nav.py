@@ -37,7 +37,7 @@ class ImageSubscriber(Node):
         
         # Parámetros de control actualizados
         self.STOP_DISTANCE = 1.5  # Reducido para no detenerse tan pronto
-        self.SLOW_DISTANCE = 0.85  # Reducido para mejor control
+        self.SLOW_DISTANCE = 0.90  # Reducido para mejor control
         self.MAX_SPEED = 0.18   # Aumentado para mayor velocidad forward
         self.MIN_SPEED = 0.05
         self.angular_speed = 0.5        # Reducido para giros más suaves
